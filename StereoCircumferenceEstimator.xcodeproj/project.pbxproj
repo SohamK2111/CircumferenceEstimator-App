@@ -1,0 +1,567 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		FCC189102CE393E80044C8A9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FCC188F72CE393E60044C8A9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCC188FE2CE393E60044C8A9;
+			remoteInfo = StereoCircumferenceEstimator;
+		};
+		FCC1891A2CE393E80044C8A9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FCC188F72CE393E60044C8A9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCC188FE2CE393E60044C8A9;
+			remoteInfo = StereoCircumferenceEstimator;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FCC188FF2CE393E60044C8A9 /* StereoCircumferenceEstimator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StereoCircumferenceEstimator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCC1890F2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StereoCircumferenceEstimatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCC189192CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StereoCircumferenceEstimatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		FCC189012CE393E60044C8A9 /* StereoCircumferenceEstimator */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StereoCircumferenceEstimator;
+			sourceTree = "<group>";
+		};
+		FCC189122CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StereoCircumferenceEstimatorTests;
+			sourceTree = "<group>";
+		};
+		FCC1891C2CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StereoCircumferenceEstimatorUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FCC188FC2CE393E60044C8A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC1890C2CE393E80044C8A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC189162CE393E80044C8A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FCC188F62CE393E60044C8A9 = {
+			isa = PBXGroup;
+			children = (
+				FCC189012CE393E60044C8A9 /* StereoCircumferenceEstimator */,
+				FCC189122CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */,
+				FCC1891C2CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */,
+				FCC189002CE393E60044C8A9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FCC189002CE393E60044C8A9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FCC188FF2CE393E60044C8A9 /* StereoCircumferenceEstimator.app */,
+				FCC1890F2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests.xctest */,
+				FCC189192CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FCC188FE2CE393E60044C8A9 /* StereoCircumferenceEstimator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCC189232CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimator" */;
+			buildPhases = (
+				FCC188FB2CE393E60044C8A9 /* Sources */,
+				FCC188FC2CE393E60044C8A9 /* Frameworks */,
+				FCC188FD2CE393E60044C8A9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FCC189012CE393E60044C8A9 /* StereoCircumferenceEstimator */,
+			);
+			name = StereoCircumferenceEstimator;
+			packageProductDependencies = (
+			);
+			productName = StereoCircumferenceEstimator;
+			productReference = FCC188FF2CE393E60044C8A9 /* StereoCircumferenceEstimator.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FCC1890E2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCC189262CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimatorTests" */;
+			buildPhases = (
+				FCC1890B2CE393E80044C8A9 /* Sources */,
+				FCC1890C2CE393E80044C8A9 /* Frameworks */,
+				FCC1890D2CE393E80044C8A9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCC189112CE393E80044C8A9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FCC189122CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */,
+			);
+			name = StereoCircumferenceEstimatorTests;
+			packageProductDependencies = (
+			);
+			productName = StereoCircumferenceEstimatorTests;
+			productReference = FCC1890F2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		FCC189182CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCC189292CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimatorUITests" */;
+			buildPhases = (
+				FCC189152CE393E80044C8A9 /* Sources */,
+				FCC189162CE393E80044C8A9 /* Frameworks */,
+				FCC189172CE393E80044C8A9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCC1891B2CE393E80044C8A9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FCC1891C2CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */,
+			);
+			name = StereoCircumferenceEstimatorUITests;
+			packageProductDependencies = (
+			);
+			productName = StereoCircumferenceEstimatorUITests;
+			productReference = FCC189192CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FCC188F72CE393E60044C8A9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					FCC188FE2CE393E60044C8A9 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					FCC1890E2CE393E80044C8A9 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = FCC188FE2CE393E60044C8A9;
+					};
+					FCC189182CE393E80044C8A9 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = FCC188FE2CE393E60044C8A9;
+					};
+				};
+			};
+			buildConfigurationList = FCC188FA2CE393E60044C8A9 /* Build configuration list for PBXProject "StereoCircumferenceEstimator" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FCC188F62CE393E60044C8A9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FCC189002CE393E60044C8A9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FCC188FE2CE393E60044C8A9 /* StereoCircumferenceEstimator */,
+				FCC1890E2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */,
+				FCC189182CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FCC188FD2CE393E60044C8A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC1890D2CE393E80044C8A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC189172CE393E80044C8A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FCC188FB2CE393E60044C8A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC1890B2CE393E80044C8A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCC189152CE393E80044C8A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FCC189112CE393E80044C8A9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FCC188FE2CE393E60044C8A9 /* StereoCircumferenceEstimator */;
+			targetProxy = FCC189102CE393E80044C8A9 /* PBXContainerItemProxy */;
+		};
+		FCC1891B2CE393E80044C8A9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FCC188FE2CE393E60044C8A9 /* StereoCircumferenceEstimator */;
+			targetProxy = FCC1891A2CE393E80044C8A9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FCC189212CE393E80044C8A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FCC189222CE393E80044C8A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FCC189242CE393E80044C8A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StereoCircumferenceEstimator/Preview Content\"";
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FCC189252CE393E80044C8A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StereoCircumferenceEstimator/Preview Content\"";
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FCC189272CE393E80044C8A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StereoCircumferenceEstimator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StereoCircumferenceEstimator";
+			};
+			name = Debug;
+		};
+		FCC189282CE393E80044C8A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StereoCircumferenceEstimator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StereoCircumferenceEstimator";
+			};
+			name = Release;
+		};
+		FCC1892A2CE393E80044C8A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = StereoCircumferenceEstimator;
+			};
+			name = Debug;
+		};
+		FCC1892B2CE393E80044C8A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XW46FX4MLB;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = StereoCircumferenceEstimator;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FCC188FA2CE393E60044C8A9 /* Build configuration list for PBXProject "StereoCircumferenceEstimator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCC189212CE393E80044C8A9 /* Debug */,
+				FCC189222CE393E80044C8A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCC189232CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCC189242CE393E80044C8A9 /* Debug */,
+				FCC189252CE393E80044C8A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCC189262CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimatorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCC189272CE393E80044C8A9 /* Debug */,
+				FCC189282CE393E80044C8A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCC189292CE393E80044C8A9 /* Build configuration list for PBXNativeTarget "StereoCircumferenceEstimatorUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCC1892A2CE393E80044C8A9 /* Debug */,
+				FCC1892B2CE393E80044C8A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FCC188F72CE393E60044C8A9 /* Project object */;
+}
