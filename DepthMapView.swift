@@ -1,8 +1,133 @@
-//
-//  DepthMapView.swift
-//  StereoCircumferenceEstimator
-//
-//  Created by Soham Karmarkar on 12/11/2024.
-//
+import SwiftUI
 
-import Foundation
+//struct DepthMapView: View {
+//    @ObservedObject var arModel: ARModel
+//    
+//    var body: some View {
+//        GeometryReader { geometry in
+//            if let depthImage = $arModel.depthMapImage {
+//                Image(uiImage: depthImage)
+//                    .resizable()
+//                    .aspectRatio(contentMode: .fill)
+//                    .frame(width: geometry.size.width, height: geometry.size.height)
+//                    .clipped()
+//                    .blendMode(.overlay)
+//            } else {
+//                Color.clear
+//                    .frame(width: geometry.size.width, height: geometry.size.height)
+//            }
+//        }
+//        .edgesIgnoringSafeArea(.all)
+//    }
+//}
+//
+//struct DepthMapView: View {
+//    @ObservedObject var arModel: ARModel
+//    
+//    var body: some View {
+////        GeometryReader { geometry in
+////            if let depthImage = $arModel.depthMapImage {
+////                Image(uiImage: depthImage)
+////                    .resizable()
+////                    .aspectRatio(contentMode: .fill)
+////                    .frame(width: geometry.size.width, height: geometry.size.height)
+////                    .clipped()
+////                    .blendMode(.overlay)
+////            } else {
+////                Color.clear
+////                    .frame(width: geometry.size.width, height: geometry.size.height)
+////            }
+////        }
+////        .edgesIgnoringSafeArea(.all)
+//        GeometryReader { geometry in
+//            Color.clear
+//                .frame(width: geometry.size.width, height: geometry.size.height)
+//                .edgesIgnoringSafeArea(.all)
+//        }
+//    }
+//}
+
+import SwiftUI
+
+struct DepthMapView: View {
+    /// A 1D vertical slice of LiDAR data in meters.
+    /// Indices in [0..(depthData.count-1)] correspond to row y-values in the depth map.
+    var depthData: [Float]
+    
+    /// Indices where gradient > threshold
+    var depthEdges: [Int]
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let height = geometry.size.height
+            
+            if depthData.isEmpty {
+                Color.clear
+            } else {
+                // Hard-coded chart range from 0..1.5 meters; tweak as needed
+                let minDepth: Float = 0.0
+                let maxDepth: Float = 1.5
+                let range = maxDepth - minDepth
+                
+                let axisWidth: CGFloat = 50
+                let spacing: CGFloat = 8
+                let plotWidth = width - axisWidth - spacing
+                let plotHeight = height
+                
+                // Convert slice indices => X
+                let scaleX = plotWidth / CGFloat(depthData.count - 1)
+                // Convert meters => Y
+                let scaleY = (range > 0) ? (plotHeight / CGFloat(range)) : 1.0
+                
+                HStack(spacing: spacing) {
+                    // Y-axis
+                    VStack {
+                        // For example, 6 ticks (0..1.5)
+                        ForEach((0...5).reversed(), id: \.self) { i in
+                            let fraction = CGFloat(i) / 5.0
+                            let labelDepth = minDepth + Float(fraction) * range
+                            Text(String(format: "%.2f m", labelDepth))
+                                .font(.caption2)
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                    }
+                    .frame(width: axisWidth)
+                    
+                    ZStack(alignment: .topLeading) {
+                        // 1) Plot the LiDAR slice as a "blue line"
+                        Path { path in
+                            for (i, val) in depthData.enumerated() {
+                                let clamped = max(minDepth, min(val, maxDepth))
+                                let x = CGFloat(i) * scaleX
+                                let y = plotHeight - (CGFloat(clamped - minDepth) * scaleY)
+                                
+                                if i == 0 {
+                                    path.move(to: CGPoint(x: x, y: y))
+                                } else {
+                                    path.addLine(to: CGPoint(x: x, y: y))
+                                }
+                            }
+                        }
+                        .stroke(Color.blue, lineWidth: 2)
+                        
+                        // 2) Red vertical lines for edges
+                        Path { edgePath in
+                            for edgeIndex in depthEdges {
+                                guard edgeIndex >= 0, edgeIndex < depthData.count else { continue }
+                                let x = CGFloat(edgeIndex) * scaleX
+                                edgePath.move(to: CGPoint(x: x, y: 0))
+                                edgePath.addLine(to: CGPoint(x: x, y: plotHeight))
+                            }
+                        }
+                        .stroke(Color.red, lineWidth: 1.5)
+                    }
+                    .frame(width: plotWidth, height: plotHeight)
+                }
+            }
+        }
+        .padding()
+    }
+}
+

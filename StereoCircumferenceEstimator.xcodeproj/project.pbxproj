@@ -6,6 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FCC189352CE3A73C0044C8A9 /* DeepLabV3Int8LUT.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = FCC189342CE3A73C0044C8A9 /* DeepLabV3Int8LUT.mlmodel */; };
+		FCC189392CE3A9870044C8A9 /* DepthAnythingV2SmallF16.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = FCC189382CE3A9870044C8A9 /* DepthAnythingV2SmallF16.mlpackage */; };
+		FCC1896A2CE3BE990044C8A9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC189672CE3BE990044C8A9 /* AppDelegate.swift */; };
+		FCC1896F2CE3BE9F0044C8A9 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1896E2CE3BE9F0044C8A9 /* GraphView.swift */; };
+		FCC189702CE3BE9F0044C8A9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1896D2CE3BE9F0044C8A9 /* ContentView.swift */; };
+		FCC189762CE3C2CD0044C8A9 /* DepthMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC189752CE3C2CD0044C8A9 /* DepthMapView.swift */; };
+		FCC189892CE5090B0044C8A9 /* MeasurementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC189882CE5090B0044C8A9 /* MeasurementsView.swift */; };
+		FCC1C50B2CF22FE30044C8A9 /* ARModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1C50A2CF22FE30044C8A9 /* ARModel.swift */; };
+		FCC1C6082D2FF99A0044C8A9 /* CameraView LIDAR.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1C6072D2FF99A0044C8A9 /* CameraView LIDAR.swift */; };
+		FCC1C6292D4C29400044C8A9 /* CalculationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1C6282D4C29400044C8A9 /* CalculationView.swift */; };
+		FCC1C62B2D4EA4E80044C8A9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC1C62A2D4EA4E80044C8A9 /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		FCC189102CE393E80044C8A9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +41,17 @@
 		FCC188FF2CE393E60044C8A9 /* StereoCircumferenceEstimator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StereoCircumferenceEstimator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCC1890F2CE393E80044C8A9 /* StereoCircumferenceEstimatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StereoCircumferenceEstimatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCC189192CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StereoCircumferenceEstimatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCC189342CE3A73C0044C8A9 /* DeepLabV3Int8LUT.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = DeepLabV3Int8LUT.mlmodel; sourceTree = "<group>"; };
+		FCC189382CE3A9870044C8A9 /* DepthAnythingV2SmallF16.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = DepthAnythingV2SmallF16.mlpackage; sourceTree = "<group>"; };
+		FCC189672CE3BE990044C8A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FCC1896D2CE3BE9F0044C8A9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FCC1896E2CE3BE9F0044C8A9 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
+		FCC189752CE3C2CD0044C8A9 /* DepthMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapView.swift; sourceTree = "<group>"; };
+		FCC189882CE5090B0044C8A9 /* MeasurementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementsView.swift; sourceTree = "<group>"; };
+		FCC1C50A2CF22FE30044C8A9 /* ARModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARModel.swift; sourceTree = "<group>"; };
+		FCC1C6072D2FF99A0044C8A9 /* CameraView LIDAR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraView LIDAR.swift"; sourceTree = "<group>"; };
+		FCC1C6282D4C29400044C8A9 /* CalculationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculationView.swift; sourceTree = "<group>"; };
+		FCC1C62A2D4EA4E80044C8A9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +68,11 @@
 		FCC1891C2CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = StereoCircumferenceEstimatorUITests;
+			sourceTree = "<group>";
+		};
+		FCC1C6272D4829520044C8A9 /* Unused */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Unused;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +105,22 @@
 		FCC188F62CE393E60044C8A9 = {
 			isa = PBXGroup;
 			children = (
+				FCC189342CE3A73C0044C8A9 /* DeepLabV3Int8LUT.mlmodel */,
+				FCC189382CE3A9870044C8A9 /* DepthAnythingV2SmallF16.mlpackage */,
+				FCC189672CE3BE990044C8A9 /* AppDelegate.swift */,
+				FCC189882CE5090B0044C8A9 /* MeasurementsView.swift */,
+				FCC1C62A2D4EA4E80044C8A9 /* SettingsView.swift */,
+				FCC1C6072D2FF99A0044C8A9 /* CameraView LIDAR.swift */,
+				FCC1C50A2CF22FE30044C8A9 /* ARModel.swift */,
+				FCC189752CE3C2CD0044C8A9 /* DepthMapView.swift */,
+				FCC1896D2CE3BE9F0044C8A9 /* ContentView.swift */,
+				FCC1C6282D4C29400044C8A9 /* CalculationView.swift */,
+				FCC1896E2CE3BE9F0044C8A9 /* GraphView.swift */,
+				FCC1C6272D4829520044C8A9 /* Unused */,
 				FCC189012CE393E60044C8A9 /* StereoCircumferenceEstimator */,
 				FCC189122CE393E80044C8A9 /* StereoCircumferenceEstimatorTests */,
 				FCC1891C2CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests */,
+				FCC1C48C2CF134920044C8A9 /* Frameworks */,
 				FCC189002CE393E60044C8A9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +133,13 @@
 				FCC189192CE393E80044C8A9 /* StereoCircumferenceEstimatorUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FCC1C48C2CF134920044C8A9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -109,6 +159,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				FCC189012CE393E60044C8A9 /* StereoCircumferenceEstimator */,
+				FCC1C6272D4829520044C8A9 /* Unused */,
 			);
 			name = StereoCircumferenceEstimator;
 			packageProductDependencies = (
@@ -175,6 +226,7 @@
 				TargetAttributes = {
 					FCC188FE2CE393E60044C8A9 = {
 						CreatedOnToolsVersion = 16.0;
+						LastSwiftMigration = 1600;
 					};
 					FCC1890E2CE393E80044C8A9 = {
 						CreatedOnToolsVersion = 16.0;
@@ -236,6 +288,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCC1896A2CE3BE990044C8A9 /* AppDelegate.swift in Sources */,
+				FCC189892CE5090B0044C8A9 /* MeasurementsView.swift in Sources */,
+				FCC189762CE3C2CD0044C8A9 /* DepthMapView.swift in Sources */,
+				FCC1C50B2CF22FE30044C8A9 /* ARModel.swift in Sources */,
+				FCC1896F2CE3BE9F0044C8A9 /* GraphView.swift in Sources */,
+				FCC189702CE3BE9F0044C8A9 /* ContentView.swift in Sources */,
+				FCC189352CE3A73C0044C8A9 /* DeepLabV3Int8LUT.mlmodel in Sources */,
+				FCC189392CE3A9870044C8A9 /* DepthAnythingV2SmallF16.mlpackage in Sources */,
+				FCC1C6292D4C29400044C8A9 /* CalculationView.swift in Sources */,
+				FCC1C6082D2FF99A0044C8A9 /* CameraView LIDAR.swift in Sources */,
+				FCC1C62B2D4EA4E80044C8A9 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,12 +456,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"StereoCircumferenceEstimator/Preview Content\"";
 				DEVELOPMENT_TEAM = XW46FX4MLB;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Frameworks/**/**";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/opencv2**/**",
+					"$(PROJECT_DIR)/Frameworks/opencv2framework/Headers/**/**",
+				);
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -411,9 +483,12 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -424,12 +499,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"StereoCircumferenceEstimator/Preview Content\"";
 				DEVELOPMENT_TEAM = XW46FX4MLB;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Frameworks/**/**";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/include/opencv2**/**",
+					"$(PROJECT_DIR)/Frameworks/opencv2framework/Headers/**/**",
+				);
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,9 +526,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = iOS.StereoCircumferenceEstimator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

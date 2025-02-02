@@ -1,12 +1,6 @@
-//
-//  UIImage+OpenCVWrapper.h
-//  StereoCircumferenceEstimator
-//
-//  Created by Soham Karmarkar on 23/11/2024.
-//
+#import <UIKit/UIKit.h>
+#import <opencv2/opencv2.hpp>
 
-#ifndef UIImage_OpenCVWrapper_h
-#define UIImage_OpenCVWrapper_h
-
-
-#endif /* UIImage_OpenCVWrapper_h */
+@interface UIImage (OpenCVWrapper)
+- (void)convertToMat:(cv::Mat *)pMat alphaExists:(bool)alphaExists;
+@end

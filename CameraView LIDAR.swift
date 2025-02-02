@@ -1,288 +1,300 @@
 import SwiftUI
-import AVFoundation
-import CoreImage
+import ARKit
+import SceneKit
 
 struct CameraView: UIViewRepresentable {
     @ObservedObject var arModel: ARModel
     
-    func makeUIView(context: Context) -> PreviewView {
-        let view = PreviewView()
-        context.coordinator.setupSession(previewView: view)
-        return view
-    }
-
-    func updateUIView(_ uiView: PreviewView, context: Context) {}
-
     func makeCoordinator() -> Coordinator {
         Coordinator(arModel: arModel)
     }
-
-    class Coordinator: NSObject, AVCaptureDepthDataOutputDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
-        var arModel: ARModel
-        var captureSession: AVCaptureSession?
-        weak var previewView: PreviewView?
     
+    func makeUIView(context: Context) -> ARSCNView {
+        let sceneView = ARSCNView()
+        
+        // ARKit delegates
+        sceneView.session.delegate = context.coordinator
+        sceneView.delegate = context.coordinator
+        
+        // Create ARWorldTrackingConfiguration for LiDAR
+        let config = ARWorldTrackingConfiguration()
+        
+        // Check if device supports LiDAR-based sceneDepth
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+            config.frameSemantics.insert(.sceneDepth)
+            config.planeDetection = [.horizontal, .vertical]
+            sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
+            print("LiDAR is available and session started.")
+        } else {
+            print("LiDAR is NOT available on this device.")
+        }
+        
+        return sceneView
+    }
+    
+    func updateUIView(_ uiView: ARSCNView, context: Context) {
+        // Nothing to update dynamically
+    }
+    
+    // MARK: - Coordinator
+    class Coordinator: NSObject, ARSessionDelegate, ARSCNViewDelegate {
+        private var lastSampleTime = Date()
+        weak var sceneView: ARSCNView?
+        
+        var arModel: ARModel
+        
         init(arModel: ARModel) {
             self.arModel = arModel
-            super.init()
         }
-    
-        func setupSession(previewView: PreviewView) {
-            self.previewView = previewView
-    
-            // Create the capture session
-            let session = AVCaptureSession()
-            session.beginConfiguration()
-    
-            // Set the session preset (photo or high)
-            session.sessionPreset = .photo
-    
-            // **LiDAR Only**: We only discover LiDAR camera devices here
-            let deviceTypes: [AVCaptureDevice.DeviceType] = [
-                .builtInLiDARDepthCamera
-            ]
-            
-            // On an iPhone/iPad that doesn't have LiDAR,
-            // this discovery will return an empty 'devices' list.
-            let discoverySession = AVCaptureDevice.DiscoverySession(
-                deviceTypes: deviceTypes,
-                mediaType: .video,
-                position: .unspecified
-            )
-    
-            // If we can't find a LiDAR camera, we bail out.
-            guard let lidarCamera = discoverySession.devices.first else {
-                print("No LiDAR camera found.")
-                session.commitConfiguration()
-                return
-            }
-    
-            do {
-                // Add the video input from the LiDAR camera
-                let videoInput = try AVCaptureDeviceInput(device: lidarCamera)
-                if session.canAddInput(videoInput) {
-                    session.addInput(videoInput)
-                } else {
-                    print("Cannot add video input from LiDAR.")
-                    session.commitConfiguration()
-                    return
-                }
-    
-                // Add the depth data output
-                let depthOutput = AVCaptureDepthDataOutput()
-                depthOutput.isFilteringEnabled = true // Depth smoothing
-                depthOutput.setDelegate(self, callbackQueue: DispatchQueue(label: "depthQueue"))
-                if session.canAddOutput(depthOutput) {
-                    session.addOutput(depthOutput)
-                } else {
-                    print("Cannot add LiDAR depth data output.")
-                    session.commitConfiguration()
-                    return
-                }
-    
-                // Connect the depth data output to .depthData
-                if let connection = depthOutput.connection(with: .depthData) {
-                    connection.isEnabled = true
-                } else {
-                    print("Cannot get LiDAR depth data connection.")
-                    session.commitConfiguration()
-                    return
-                }
-    
-                // Add video data output (for the live preview)
-                let videoDataOutput = AVCaptureVideoDataOutput()
-                videoDataOutput.videoSettings = [
-                    kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-                ]
-                videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-                if session.canAddOutput(videoDataOutput) {
-                    session.addOutput(videoDataOutput)
-                }
-    
-                // Set up the preview layer
-                let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-                previewLayer.videoGravity = .resizeAspectFill
-    
-                // Install the preview layer in our SwiftUI view
-                DispatchQueue.main.async {
-                    previewView.videoPreviewLayer = previewLayer
-                    previewView.layer.insertSublayer(previewLayer, at: 0)
-                    previewLayer.frame = previewView.bounds
-                }
-    
-                session.commitConfiguration()
-                session.startRunning()
-    
-                self.captureSession = session
-    
-            } catch {
-                print("Error setting up LiDAR capture session: \(error)")
+        
+        func renderer(_ renderer: SCNSceneRenderer, didApplyConstraintsAtTime time: TimeInterval) {
+            if sceneView == nil, let scnView = renderer as? ARSCNView {
+                sceneView = scnView
             }
         }
-    
-        // MARK: - AVCaptureDepthDataOutputDelegate
-        func depthDataOutput(_ output: AVCaptureDepthDataOutput,
-                             didOutput depthData: AVDepthData,
-                             timestamp: CMTime,
-                             connection: AVCaptureConnection) {
+        
+        // MARK: - ARSessionDelegate
+        func session(_ session: ARSession, didUpdate frame: ARFrame) {
+            // Throttle LiDAR sampling to ~10Hz
+            guard Date().timeIntervalSince(lastSampleTime) >= 0.1 else { return }
+            lastSampleTime = Date()
             
-            // Convert to 32-bit float format (nominally in meters for LiDAR)
-            let depthDataType = kCVPixelFormatType_DepthFloat32
-            let convertedDepthData = depthData.converting(toDepthDataType: depthDataType)
-    
-            let depthDataMap = convertedDepthData.depthDataMap
-            CVPixelBufferLockBaseAddress(depthDataMap, .readOnly)
-    
-            let width = CVPixelBufferGetWidth(depthDataMap)
-            let height = CVPixelBufferGetHeight(depthDataMap)
-            let pixelCount = width * height
-    
-            guard let dataPointer = CVPixelBufferGetBaseAddress(depthDataMap) else {
-                CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
-                return
+            // 1) Get color-camera resolution
+            let colorRes = frame.camera.imageResolution
+            // e.g. 1920x1440 on some devices
+            let w = Int(colorRes.width)
+            let h = Int(colorRes.height)
+//            print("width: \(w), height: \(h)")
+            
+            // 2) Intrinsics => focal length in color-camera space
+            let intrinsics = frame.camera.intrinsics
+            let fx = Double(intrinsics[0][0])
+            let fy = Double(intrinsics[1][1])
+            let focalLengthColorSpace = (fx + fy) / 2.0
+
+            // 3) Send to the ARModel on main thread
+            DispatchQueue.main.async {
+                // Store color resolution
+                self.arModel.colorWidth  = w
+                self.arModel.colorHeight = h
+
+                // Store the focal length (still in color-cam pixel units)
+                self.arModel.focalLengthPixels = focalLengthColorSpace
             }
-    
-            let floatBuffer = dataPointer.bindMemory(to: Float32.self, capacity: pixelCount)
-    
-            // Center pixel index
+            
+            // 1) Update the displayTransform for the current orientation & viewport
+            let orientation = UIInterfaceOrientation.portrait
+            let size = UIScreen.main.bounds.size
+            let transform = frame.displayTransform(for: orientation, viewportSize: size)
+            
+            DispatchQueue.main.async {
+                self.arModel.displayTransform = transform
+            }
+            
+            // 2) LiDAR Depth
+            if let depthData = frame.sceneDepth {
+                processLiDARDepthData(depthData, frame: frame)
+            }
+            
+        }
+        
+        // MARK: - Process LiDAR Depth
+        func processLiDARDepthData(_ depthData: ARDepthData, frame: ARFrame) {
+            let depthMap = depthData.depthMap
+            CVPixelBufferLockBaseAddress(depthMap, .readOnly)
+            defer { CVPixelBufferUnlockBaseAddress(depthMap, .readOnly) }
+            
+            let width = CVPixelBufferGetWidth(depthMap)
+            let height = CVPixelBufferGetHeight(depthMap)
+            guard let baseAddress = CVPixelBufferGetBaseAddress(depthMap) else { return }
+            
+            let floatPtr = baseAddress.bindMemory(to: Float32.self, capacity: width * height)
+            
+            // 1) Store the entire float array in ARModel
+            var floatArray = [Float](repeating: 0, count: width * height)
+            for i in 0..<(width * height) {
+                floatArray[i] = floatPtr[i]
+            }
+            
+            // 2) The center pixel
             let centerX = width / 2
             let centerY = height / 2
             let centerIndex = centerY * width + centerX
-            let rawDepthValue = floatBuffer[centerIndex]
-            print("LiDAR raw depth at center: \(rawDepthValue) meters")
-    
-            // Keep raw depth value for further usage in arModel
-            let preciseDepthValue = rawDepthValue
-    
-            // 1) Find min & max depth to normalize 0..255
-            var minDepth = Float.greatestFiniteMagnitude
-            var maxDepth = Float.leastNormalMagnitude
-            for i in 0 ..< pixelCount {
-                let depth = floatBuffer[i]
-                if depth.isFinite {
-                    minDepth = min(minDepth, depth)
-                    maxDepth = max(maxDepth, depth)
+            let centerDepthMeters = floatPtr[centerIndex]
+            
+            // 3) Dispatch to main
+            DispatchQueue.main.async {
+                self.arModel.fullLiDARFloats = floatArray
+                self.arModel.lidarWidth = width
+                self.arModel.lidarHeight = height
+                self.arModel.centralDepth = Double(centerDepthMeters)
+            }
+            
+            // 4) min/max for debugging
+            var minVal = Float.greatestFiniteMagnitude
+            var maxVal = -Float.greatestFiniteMagnitude
+            
+            for i in 0..<(width * height) {
+                let d = floatPtr[i]
+                if d.isFinite {
+                    minVal = min(minVal, d)
+                    maxVal = max(maxVal, d)
                 }
             }
-    
-            guard maxDepth > minDepth else {
-                CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
+            
+            guard minVal < maxVal else {
+                print("LiDAR depth uniform or invalid, skipping edge detection.")
                 return
             }
-    
-            // 2) Build a grayscale array for the entire depth map
-            var depthPixels = [UInt8](repeating: 0, count: pixelCount)
-            for i in 0 ..< pixelCount {
-                let depth = floatBuffer[i]
-                if depth.isFinite {
-                    let normalizedDepth = (depth - minDepth) / (maxDepth - minDepth)
-                    // Invert so nearer = lighter, or keep as-is if you prefer
-                    let pixelValue = UInt8((1.0 - normalizedDepth) * 255.0)
-                    depthPixels[i] = pixelValue
-                } else {
-                    depthPixels[i] = 0
-                }
-            }
-    
-            CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
-    
-            // If calibration data is present, we can get focal length in pixels
-            if let calibrationData = depthData.cameraCalibrationData {
-                let intrinsicMatrix = calibrationData.intrinsicMatrix
-                let fx = intrinsicMatrix.columns.0.x
-                let fy = intrinsicMatrix.columns.1.y
-                let focalLengthPixels = (Double(fx) + Double(fy)) / 2.0
-                DispatchQueue.main.async {
-                    self.arModel.focalLengthPixels = focalLengthPixels
-                }
-            }
-    
-            // 3) Convert that depthPixels array into a CGImage -> UIImage
-            let depthData = Data(depthPixels)
-            guard let depthDataProvider = CGDataProvider(data: depthData as CFData) else { return }
-            let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
-            guard let depthCGImage = CGImage(
-                width: width,
-                height: height,
-                bitsPerComponent: 8,
-                bitsPerPixel: 8,
-                bytesPerRow: width,
-                space: CGColorSpaceCreateDeviceGray(),
-                bitmapInfo: bitmapInfo,
-                provider: depthDataProvider,
-                decode: nil,
-                shouldInterpolate: false,
-                intent: .defaultIntent
-            ) else { return }
-    
-            // Convert the CGImage to CIImage for orientation fix
-            var ciImage = CIImage(cgImage: depthCGImage)
-            let ciOrientation: CGImagePropertyOrientation = .right
-            let correctedImage = ciImage.oriented(ciOrientation)
-    
-            // Finally build a UIImage
-            let context = CIContext()
-            if let cgImage = context.createCGImage(correctedImage, from: correctedImage.extent) {
-                let depthImage = UIImage(cgImage: cgImage)
-    
-                // Update your ARModel on the main thread
-                DispatchQueue.main.async {
-                    self.arModel.depthMapImage = depthImage
-                    self.arModel.centralDepth = preciseDepthValue.isFinite ? Double(preciseDepthValue) : nil
-                }
-            }
-        }
-    
-        // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-        func captureOutput(_ output: AVCaptureOutput,
-                           didOutput sampleBuffer: CMSampleBuffer,
-                           from connection: AVCaptureConnection) {
-            // We process the main video frames here
-            if let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
-                processVideoFrame(pixelBuffer)
-            }
-        }
-    
-        func processVideoFrame(_ pixelBuffer: CVPixelBuffer) {
-            CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-            defer {
-                CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
-            }
             
-            let width = CVPixelBufferGetWidth(pixelBuffer)
-            let height = CVPixelBufferGetHeight(pixelBuffer)
-            let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-            guard let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer) else { return }
-            let buffer = baseAddress.bindMemory(to: UInt8.self, capacity: bytesPerRow * height)
-            
-            let columnX = width / 2
-            var grayscaleColumn = [UInt8](repeating: 0, count: height)
-            
-            // Convert a vertical column from BGRA to grayscale
-            for y in 0..<height {
-                let offset = y * bytesPerRow + columnX * 4
-                // BGRA format
-                let b = buffer[offset]
-                let g = buffer[offset + 1]
-                let r = buffer[offset + 2]
-                let gray = UInt8(0.299 * Double(r) + 0.587 * Double(g) + 0.114 * Double(b))
-                grayscaleColumn[y] = gray
-            }
             
             DispatchQueue.main.async {
-                self.arModel.updateGrayscaleColumn(grayscaleColumn)
+                self.arModel.depthMinValue = minVal
+                self.arModel.depthMaxValue = maxVal
+                
+                // Now compute the 1D edge indices after updating fullLiDARFloats
+                self.arModel.computeDepthEdges()
             }
         }
     }
 }
-
-// A UIView to hold the preview layer
-class PreviewView: UIView {
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        videoPreviewLayer?.frame = bounds
-    }
-}
-
+//
+//import SwiftUI
+//import ARKit
+//import SceneKit
+//
+//struct CameraView: UIViewRepresentable {
+//    @ObservedObject var arModel: ARModel
+//    
+//    func makeCoordinator() -> Coordinator {
+//        Coordinator(arModel: arModel)
+//    }
+//    
+//    func makeUIView(context: Context) -> ARSCNView {
+//        let sceneView = ARSCNView()
+//        
+//        // Use the same ARSession from ARModel
+//        sceneView.session = arModel.arSession
+//        
+//        sceneView.delegate = context.coordinator
+//        
+//        // Optionally run the same configuration here
+//        let config = ARWorldTrackingConfiguration()
+//        if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+//            config.frameSemantics.insert(.sceneDepth)
+//            config.planeDetection = [.horizontal, .vertical]
+//        } else if ARWorldTrackingConfiguration.supportsFrameSemantics(.smoothedSceneDepth) {
+//            config.frameSemantics.insert(.smoothedSceneDepth)
+//            config.planeDetection = [.horizontal, .vertical]
+//        }
+//        sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
+//        
+//        return sceneView
+//    }
+//    
+//    func updateUIView(_ uiView: ARSCNView, context: Context) {
+//        // Nothing special to update
+//    }
+//    
+//    // MARK: - Coordinator
+//    class Coordinator: NSObject, ARSCNViewDelegate, ARSessionDelegate {
+//        
+//        var arModel: ARModel
+//        private var lastSampleTime = Date()
+//        
+//        init(arModel: ARModel) {
+//            self.arModel = arModel
+//        }
+//        
+//        func session(_ session: ARSession, didUpdate frame: ARFrame) {
+//            // Throttle ~10Hz
+//            guard Date().timeIntervalSince(lastSampleTime) >= 0.1 else { return }
+//            lastSampleTime = Date()
+//            
+//            // 1) Color-camera resolution
+//            let colorRes = frame.camera.imageResolution
+//            let w = Int(colorRes.width)
+//            let h = Int(colorRes.height)
+//            
+//            // 2) Intrinsics => focal length
+//            let intrinsics = frame.camera.intrinsics
+//            let fx = Double(intrinsics[0][0])
+//            let fy = Double(intrinsics[1][1])
+//            let focalLengthColorSpace = (fx + fy) / 2.0
+//
+//            // 3) Update ARModel
+//            DispatchQueue.main.async {
+//                self.arModel.colorWidth  = w
+//                self.arModel.colorHeight = h
+//                self.arModel.focalLengthPixels = focalLengthColorSpace
+//            }
+//            
+//            // 4) Display transform
+//            let orientation = UIInterfaceOrientation.portrait
+//            let size = UIScreen.main.bounds.size
+//            let transform = frame.displayTransform(for: orientation, viewportSize: size)
+//            
+//            DispatchQueue.main.async {
+//                self.arModel.displayTransform = transform
+//            }
+//            
+//            // 5) Depth data
+//            if let depthData = frame.sceneDepth ?? frame.smoothedSceneDepth {
+//                processDepthData(depthData)
+//            }
+//        }
+//        
+//        func processDepthData(_ depthData: ARDepthData) {
+//            let depthMap = depthData.depthMap
+//            CVPixelBufferLockBaseAddress(depthMap, .readOnly)
+//            defer { CVPixelBufferUnlockBaseAddress(depthMap, .readOnly) }
+//            
+//            let width = CVPixelBufferGetWidth(depthMap)
+//            let height = CVPixelBufferGetHeight(depthMap)
+//            guard let baseAddress = CVPixelBufferGetBaseAddress(depthMap) else { return }
+//            
+//            let floatPtr = baseAddress.bindMemory(to: Float32.self, capacity: width * height)
+//            
+//            // Copy entire depth map
+//            var floatArray = [Float](repeating: 0, count: width * height)
+//            for i in 0..<(width * height) {
+//                floatArray[i] = floatPtr[i]
+//            }
+//            
+//            // Center pixel
+//            let centerX = width / 2
+//            let centerY = height / 2
+//            let centerIndex = centerY * width + centerX
+//            let centerDepthMeters = floatPtr[centerIndex]
+//            
+//            // Min/max
+//            var minVal = Float.greatestFiniteMagnitude
+//            var maxVal = -Float.greatestFiniteMagnitude
+//            for i in 0..<(width * height) {
+//                let d = floatPtr[i]
+//                if d.isFinite {
+//                    minVal = min(minVal, d)
+//                    maxVal = max(maxVal, d)
+//                }
+//            }
+//            
+//            // Update ARModel
+//            DispatchQueue.main.async {
+//                self.arModel.fullLiDARFloats = floatArray
+//                self.arModel.lidarWidth = width
+//                self.arModel.lidarHeight = height
+//                self.arModel.centralDepth = Double(centerDepthMeters)
+//                
+//                if minVal < maxVal {
+//                    self.arModel.depthMinValue = minVal
+//                    self.arModel.depthMaxValue = maxVal
+//                    self.arModel.computeDepthEdges()
+//                } else {
+//                    self.arModel.depthMinValue = nil
+//                    self.arModel.depthMaxValue = nil
+//                    self.arModel.depthEdgeIndices = []
+//                }
+//            }
+//        }
+//    }
+//}
