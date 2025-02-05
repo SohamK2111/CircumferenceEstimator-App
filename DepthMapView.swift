@@ -1,54 +1,5 @@
 import SwiftUI
 
-//struct DepthMapView: View {
-//    @ObservedObject var arModel: ARModel
-//    
-//    var body: some View {
-//        GeometryReader { geometry in
-//            if let depthImage = $arModel.depthMapImage {
-//                Image(uiImage: depthImage)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(width: geometry.size.width, height: geometry.size.height)
-//                    .clipped()
-//                    .blendMode(.overlay)
-//            } else {
-//                Color.clear
-//                    .frame(width: geometry.size.width, height: geometry.size.height)
-//            }
-//        }
-//        .edgesIgnoringSafeArea(.all)
-//    }
-//}
-//
-//struct DepthMapView: View {
-//    @ObservedObject var arModel: ARModel
-//    
-//    var body: some View {
-////        GeometryReader { geometry in
-////            if let depthImage = $arModel.depthMapImage {
-////                Image(uiImage: depthImage)
-////                    .resizable()
-////                    .aspectRatio(contentMode: .fill)
-////                    .frame(width: geometry.size.width, height: geometry.size.height)
-////                    .clipped()
-////                    .blendMode(.overlay)
-////            } else {
-////                Color.clear
-////                    .frame(width: geometry.size.width, height: geometry.size.height)
-////            }
-////        }
-////        .edgesIgnoringSafeArea(.all)
-//        GeometryReader { geometry in
-//            Color.clear
-//                .frame(width: geometry.size.width, height: geometry.size.height)
-//                .edgesIgnoringSafeArea(.all)
-//        }
-//    }
-//}
-
-import SwiftUI
-
 struct DepthMapView: View {
     /// A 1D vertical slice of LiDAR data in meters.
     /// Indices in [0..(depthData.count-1)] correspond to row y-values in the depth map.

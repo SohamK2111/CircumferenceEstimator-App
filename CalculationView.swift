@@ -22,10 +22,10 @@ struct CalculationView: View {
         .navigationTitle("Circumference Calc")
     }
     
-    /// Gathers (w, theta) from `arModel.measurements`, sorts by ascending theta (in degrees),
-    /// then **converts** degrees -> radians, and does:
-    ///   integrand(θ) = w(θ) + d²w/dθ²
-    ///   circumference = Simpson(integrand)
+    // Gathers (w, theta) from `arModel.measurements`, sorts by ascending theta (in degrees),
+    // then **converts** degrees -> radians, and does:
+    //   integrand(θ) = w(θ) + d²w/dθ²
+    //   circumference = Simpson(integrand)
     private func computeCircumference() -> Double {
         let ms = arModel.measurements
         if ms.count < 3 { return 0 }
