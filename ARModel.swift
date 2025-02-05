@@ -27,7 +27,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     @Published var pitch: Double = 0.0
     @Published var roll: Double = 0.0
     
-    // Computed property to determine if the device is “perfectly vertical.
+    // Computed property to determine if the device is “perfectly vertical.”
     var isVertical: Bool {
         let threshold = 5.0 * (.pi / 180.0)
         return abs(abs(pitch) - (.pi / 2)) < threshold
@@ -175,26 +175,87 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
             return
         }
         
-        var edges: [Int] = []
+        // Step 1: Detect candidate edges based on depth differences.
+        var candidateEdges: [Int] = []
         for i in 0..<(slice.count - 1) {
             let diff = abs(slice[i + 1] - slice[i])
             if diff > depthEdgeThreshold {
-                edges.append(i)
+                candidateEdges.append(i)
             }
         }
         
+        // Step 2: For each candidate edge, compute a "characterization" value by sampling depths to its left and right.
+        // We use an offset of 2 indices. Boundaries are handled by clamping to the valid index range.
+        var characterizedEdges: [(index: Int, charDepth: Double)] = []
+        for i in candidateEdges {
+            let leftIndex = max(i - 2, 0)
+            let rightIndex = min(i + 2, slice.count - 1)
+            let leftDepth = Double(slice[leftIndex])
+            let rightDepth = Double(slice[rightIndex])
+            let charDepth = min(leftDepth, rightDepth)
+            characterizedEdges.append((index: i, charDepth: charDepth))
+        }
+        
+        // Keep track of previously identified edges before computing new ones.
+        let oldEdges = self.depthEdgeIndices
+
+        // Step 3: Pre-filter out edges whose characterization depth is 1.20m or more.
+        let filteredCharacterizedEdges = characterizedEdges.filter { $0.charDepth < 1.20 }
+
+        // Step 4: If more than two candidate edges remain, sort by their characterization depth
+        // (lowest = closest) and choose the two with the lowest values.
+        var finalEdges: [Int] = []
+        if filteredCharacterizedEdges.count >= 2 {
+            let sortedEdges = filteredCharacterizedEdges.sorted { $0.charDepth < $1.charDepth }
+            finalEdges = Array(sortedEdges.prefix(2)).map { $0.index }.sorted()
+        } else {
+            finalEdges = []
+        }
+
+        // >>> NEW LOGIC: If the newly found edges are too close (< 3 indices apart), revert to old edges. <<<
+        if finalEdges.count == 2 {
+            let diff = abs(finalEdges[1] - finalEdges[0])
+            if diff < 3 {
+                finalEdges = oldEdges
+            }
+        }
+
+        // Step 5: Update properties on the main thread.
         DispatchQueue.main.async {
-            self.depthEdgeIndices = edges
+            self.depthEdgeIndices = finalEdges
             
-            if edges.count >= 2 {
-                let first = edges.first!
-                let last = edges.last!
+            if finalEdges.count >= 2 {
+                let first = finalEdges.first!
+                let last = finalEdges.last!
                 self.edgeDistance = abs(last - first)
                 
                 if let edgeDist = self.edgeDistance, edgeDist > 0 {
                     // Scaling factor can be adjusted as needed.
                     self.screenPixelSpanFromEdges = CGFloat(edgeDist) *
-                                                    UIScreen.main.bounds.width * 3 / 118.0
+                        UIScreen.main.bounds.width * 3 / 118.0
+                } else {
+                    self.screenPixelSpanFromEdges = nil
+                }
+            } else {
+                self.edgeDistance = nil
+                self.screenPixelSpanFromEdges = nil
+            }
+        }
+
+        
+        // Step 5: Update properties on the main thread.
+        DispatchQueue.main.async {
+            self.depthEdgeIndices = finalEdges
+            
+            if finalEdges.count >= 2 {
+                let first = finalEdges.first!
+                let last = finalEdges.last!
+                self.edgeDistance = abs(last - first)
+                
+                if let edgeDist = self.edgeDistance, edgeDist > 0 {
+                    // Scaling factor can be adjusted as needed.
+                    self.screenPixelSpanFromEdges = CGFloat(edgeDist) *
+                        UIScreen.main.bounds.width * 3 / 118.0
                 } else {
                     self.screenPixelSpanFromEdges = nil
                 }
@@ -262,30 +323,49 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
             usedDepth = centralDepth
         }
         
+        // If required parameters are missing, use the last nonzero value from the buffer.
         guard let dist = edgeDistance,
               let depthValue = usedDepth,
               let focalColor = focalLengthPixels,
               focalColor > 0,
               colorHeight > 0,
               lidarHeight > 0 else {
-            realWidth = nil
+            
+            // Fall back to the last nonzero value in the buffer
+            if let lastNonZero = realWidthBuffer.reversed().first(where: { $0 != 0 }) {
+                realWidth = lastNonZero
+            } else {
+                realWidth = nil
+            }
             return
         }
         
         // Adjust for difference in resolution between color & LiDAR.
         let focalLidarY = focalColor * (Double(lidarHeight) / Double(colorHeight))
-        // Add a constant value to the edge distance.
-        let adjustedDist = Double(dist) + 0.0 // Added constant.
+        let adjustedDist = Double(dist) // Constant adjustment can be applied here if needed.
         let newWidth = (adjustedDist * depthValue) / focalLidarY
         
         // Update the moving average buffer.
         realWidthBuffer.append(newWidth)
+        // Ensure we only keep the most recent 3 values (or fewer if they've been 0 in the past).
         if realWidthBuffer.count > 3 {
             realWidthBuffer.removeFirst()
         }
-        // Update realWidth as the average of the buffer.
-        realWidth = realWidthBuffer.reduce(0, +) / Double(realWidthBuffer.count)
+        
+        // Use the moving average ONLY if we have at least 3 nonzero entries.
+        let nonZeroValues = realWidthBuffer.filter { $0 != 0 }
+        if nonZeroValues.count >= 3 {
+            realWidth = nonZeroValues.reduce(0.0, +) / Double(nonZeroValues.count)
+        } else {
+            // Otherwise, fall back to the last nonzero value in the buffer.
+            if let lastNonZero = realWidthBuffer.reversed().first(where: { $0 != 0 }) {
+                realWidth = lastNonZero
+            } else {
+                realWidth = nil
+            }
+        }
     }
+
     
     // MARK: - Convert LiDAR Coordinates to Screen Coordinates
     func lidarToScreenPoint(col: Int, row: Int) -> CGPoint? {
