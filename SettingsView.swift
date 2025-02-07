@@ -17,10 +17,10 @@ struct SettingsView: View {
                 Text(String(format: "Threshold: %.2f", arModel.depthEdgeThreshold))
             }
             
-//            Section(header: Text("Gaussian Sigma (Absolute)")) {
-//                Slider(value: $arModel.gaussianSigma, in: 1...50, step: 1)
-//                Text("Sigma: \(Int(arModel.gaussianSigma))")
-//            }
+            Section(header: Text("Scaling Constant")) {
+                Slider(value: $arModel.constant, in: 0.0...10.0, step: 1.0)
+                Text("Scaling Constant: \(Int(arModel.constant))")
+            }
         }
         .navigationTitle("Settings")
     }

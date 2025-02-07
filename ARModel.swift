@@ -29,7 +29,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     
     // Computed property to determine if the device is “perfectly vertical.”
     var isVertical: Bool {
-        let threshold = 5.0 * (.pi / 180.0)
+        let threshold = 2.5 * (.pi / 180.0)
         return abs(abs(pitch) - (.pi / 2)) < threshold
     }
     
@@ -166,6 +166,8 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     
     @Published var displayTransform: CGAffineTransform = .identity
     @Published var screenPixelSpanFromEdges: CGFloat? = nil
+    @Published var scalingConstant: Float = 0.0  // Editable threshold via settings.
+
     
     func computeDepthEdges() {
         guard let slice = averagedCentralColumnsDepthFloats(colCount: 5) else {
@@ -219,29 +221,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
                 finalEdges = oldEdges
             }
         }
-
-        // Step 5: Update properties on the main thread.
-        DispatchQueue.main.async {
-            self.depthEdgeIndices = finalEdges
-            
-            if finalEdges.count >= 2 {
-                let first = finalEdges.first!
-                let last = finalEdges.last!
-                self.edgeDistance = abs(last - first)
-                
-                if let edgeDist = self.edgeDistance, edgeDist > 0 {
-                    // Scaling factor can be adjusted as needed.
-                    self.screenPixelSpanFromEdges = CGFloat(edgeDist) *
-                        UIScreen.main.bounds.width * 3 / 118.0
-                } else {
-                    self.screenPixelSpanFromEdges = nil
-                }
-            } else {
-                self.edgeDistance = nil
-                self.screenPixelSpanFromEdges = nil
-            }
-        }
-
+        
         
         // Step 5: Update properties on the main thread.
         DispatchQueue.main.async {
@@ -250,12 +230,12 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
             if finalEdges.count >= 2 {
                 let first = finalEdges.first!
                 let last = finalEdges.last!
-                self.edgeDistance = abs(last - first)
+                self.edgeDistance = abs(last - first) + 0
                 
                 if let edgeDist = self.edgeDistance, edgeDist > 0 {
                     // Scaling factor can be adjusted as needed.
                     self.screenPixelSpanFromEdges = CGFloat(edgeDist) *
-                        UIScreen.main.bounds.width * 3 / 118.0
+                    UIScreen.main.bounds.width * 3 / 118.0
                 } else {
                     self.screenPixelSpanFromEdges = nil
                 }
@@ -263,6 +243,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
                 self.edgeDistance = nil
                 self.screenPixelSpanFromEdges = nil
             }
+//            print(self.edgeDistance as Any)
         }
     }
     
@@ -305,6 +286,8 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
         didSet { computeRealWidth() }
     }
     
+    @Published var constant: Double = 2.0
+    
     func computeRealWidth() {
         // Instead of always using the centralDepth,
         // try to use a depth value measured at the object edge.
@@ -318,9 +301,11 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
             let leftIndex = min(leftEdge + 2, slice.count - 1)
             let rightIndex = max(rightEdge - 2, 0)
             usedDepth = (Double(slice[leftIndex]) + Double(slice[rightIndex])) / 2.0
+//            print("Using new edge-based depth: \(usedDepth ?? 0)")
         } else {
             // Fallback: use the centralDepth if edges aren’t detected.
             usedDepth = centralDepth
+//            print("Falling back to central depth: \(usedDepth ?? 0)")
         }
         
         // If required parameters are missing, use the last nonzero value from the buffer.
@@ -342,7 +327,8 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
         
         // Adjust for difference in resolution between color & LiDAR.
         let focalLidarY = focalColor * (Double(lidarHeight) / Double(colorHeight))
-        let adjustedDist = Double(dist) // Constant adjustment can be applied here if needed.
+        let adjustedDist = Double(dist) + constant // Constant adjustment can be applied here if needed.
+        print(adjustedDist)
         let newWidth = (adjustedDist * depthValue) / focalLidarY
         
         // Update the moving average buffer.
