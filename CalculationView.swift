@@ -1,6 +1,6 @@
 import SwiftUI
+import Charts
 
-// Enum to indicate which calculation method to use.
 enum CalculationMode {
     case full
     case twoPoint
@@ -10,126 +10,225 @@ enum CalculationMode {
 struct CalculationView: View {
     @ObservedObject var arModel: ARModel
     let mode: CalculationMode
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            
-            // Select the appropriate computation.
-            let circumference: Double = {
-                switch mode {
-                case .full:
-                    return computeCircumferenceFull()
-                case .twoPoint:
-                    return computeCircumferenceTwoPoint()
-                case .circular:
-                    return computeCircumferenceCircular()
-                }
-            }()
-            
-            Text("Approx. Result:")
-                .font(.headline)
-            
-            Text(String(format: "%.2f cm", circumference * 100))
-                .font(.largeTitle)
-                .bold()
-                .padding(.horizontal)
-            
-            Spacer()
-        }
-        .navigationTitle("Circumference Calc")
+
+    // Helper: Compute average real width (in meters) from non-placeholder measurements.
+    private func averageRealWidth() -> Double? {
+        let widths = arModel.measurements.compactMap { $0.realWidth }
+        return widths.isEmpty ? nil : widths.reduce(0, +) / Double(widths.count)
     }
     
-    // MARK: - Full integration (original method)
+    // Helper: Compute average depth (in meters) from measurements.
+    private func averageDepth() -> Double? {
+        let depths = arModel.measurements.compactMap { $0.centralDepth }
+        return depths.isEmpty ? nil : depths.reduce(0, +) / Double(depths.count)
+    }
+    
+    // Helper: Compute average edge distance (in pixels) from measurements.
+    private func averageEdgeDistance() -> Double? {
+        let edges = arModel.measurements.compactMap { measurement -> Double? in
+            if let edge = measurement.edgeDistance {
+                return Double(edge)
+            }
+            return nil
+        }
+        return edges.isEmpty ? nil : edges.reduce(0, +) / Double(edges.count)
+    }
+    
+    // Compute circumference based on the selected mode.
+    private func computeCircumference() -> Double {
+        switch mode {
+        case .full:
+            return computeCircumferenceFull()
+        case .twoPoint:
+            return computeCircumferenceTwoPoint()
+        case .circular:
+            return computeCircumferenceCircular()
+        }
+    }
+    
+    // Compute the overall error for the circumference measurement.
+//    private func computeCircumferenceError(circumference C: Double) -> Double {
+//        // Use only non-placeholder measurements for n.
+//        let validCount = arModel.measurements.filter { !$0.isPlaceholder }.count
+//        let n = max(validCount, 1)
+//        
+//        // Guard against missing values.
+//        guard let avgW = averageRealWidth(), avgW != 0,
+//              let avgDepth = averageDepth(), avgDepth != 0,
+//              let avgEdgeDistance = averageEdgeDistance(), avgEdgeDistance > 0 else {
+//            return 0.0
+//        }
+//        
+//        // Relative error from depth measurement (±3 cm, i.e. 0.03 m).
+//        let epsZ = 0.01 / avgDepth
+//        
+//        // Relative error from width pixel error (±10 pixels).
+//        let epsW = 10.0 / avgEdgeDistance
+//        
+//        // Relative error from Z-correction: the correction term is roughly half the average width.
+////        let epsZcorr = (avgW / 2) / avgDepth
+//        let epsZcorr = 0.0
+//        
+//        // Combine the "random" errors (assumed to be independent, hence reduced by sqrt(n))
+//        let randomRelError = (epsZ + epsW + epsZcorr) / sqrt(Double(n))
+//        
+//        // Simpson integration error (systematic): convert absolute Simpson error to a relative error.
+//        // (Do not update simpsonMaxDeriv here.)
+//        let simpsonRelError: Double = (C != 0) ? (0.01328 * arModel.simpsonMaxDeriv) / C : 0
+//        
+//        // Total relative error.
+//        let totalRelError = randomRelError + simpsonRelError
+//        
+//        // Overall absolute error in the circumference.
+//        let absoluteError = C * totalRelError
+//        return absoluteError
+//    }
+    
+    private func computeCircumferenceError(circumference C: Double) -> Double {
+        // Count only valid (non-placeholder) measurements.
+        let validCount = arModel.measurements.filter { !$0.isPlaceholder }.count
+        let n = max(validCount, 1)
+        
+        // Guard against missing or zero values.
+        guard let avgW = averageRealWidth(), avgW != 0,
+              let avgDepth = averageDepth(), avgDepth != 0,
+              let avgEdgeDistance = averageEdgeDistance(), avgEdgeDistance > 0 else {
+            return 0.0
+        }
+        
+        // Relative error from the depth measurement (for example, ±0.01 m uncertainty).
+        let epsZ = 0.01 / avgDepth
+        
+        // Relative error from the width pixel error (e.g. ±10 pixels).
+        let epsW = 5.0 / avgEdgeDistance
+        
+        // Simpson integration relative error remains as before.
+        let simpsonRelError: Double = (C != 0) ? (0.01328 * arModel.simpsonMaxDeriv) / C : 0
+        
+        // In the Z-correction step we add an offset of estimatedWidth/2 to Z.
+        // Because that estimated width itself has uncertainty, we assume that
+        // its contribution to the relative error is (0.25 * X)/avgDepth,
+        // where X is the absolute error in the circumference.
+        //
+        // In other words, our total relative error (excluding the feedback)
+        // is ((epsZ + epsW)/sqrt(n) + simpsonRelError), but then there is an
+        // extra term proportional to X. Writing X explicitly:
+        //
+        //    X = C * [ (epsZ + epsW)/sqrt(n) + simpsonRelError + (0.25 * X)/avgDepth ]
+        //
+        // Solving for X gives:
+        let denominator = 1 - (0.25 * C) / avgDepth
+        if denominator <= 0 {
+            // If the correction factor becomes nonphysical, return 0 or handle appropriately.
+            return 0.0
+        }
+        
+        let totalRelErrorWithoutFeedback = ((epsZ + epsW) / sqrt(Double(n))) + simpsonRelError
+        let absoluteError = C * totalRelErrorWithoutFeedback / denominator
+        return absoluteError
+    }
+    
+    // MARK: - Circumference Calculation Functions
+    
     private func computeCircumferenceFull() -> Double {
         let ms = arModel.measurements
-        // Ensure at least 3 measurements for integration.
         if ms.count < 3 { return 0 }
-        
         var widths: [Double] = []
         var angles: [Double] = []
         for m in ms {
-            widths.append(m.realWidth)
-            angles.append(Double(m.rotationAngle))
+            if let w = m.realWidth, !m.isPlaceholder {
+                widths.append(w)
+                angles.append(Double(m.rotationAngle))
+            }
         }
-        
         return integratedCircumference(widths: widths, anglesDegrees: angles)
     }
     
-    // MARK: - 2-Point Estimate
-    // Requires exactly 2 measurements. From measurements [x, y],
-    // we build new arrays: widths = [x, y, x, y, x] and angles = [0, 90, 180, 270, 360].
     private func computeCircumferenceTwoPoint() -> Double {
         let ms = arModel.measurements
         if ms.count != 2 { return 0 }
-        let x = ms[0].realWidth
-        let y = ms[1].realWidth
+        let x = ms[0].realWidth ?? 0
+        let y = ms[1].realWidth ?? 0
         let widths = [x, y, x, y, x]
         let angles = [0.0, 90.0, 180.0, 270.0, 360.0]
         return integratedCircumference(widths: widths, anglesDegrees: angles)
     }
     
-    // MARK: - Circular Approximation
-    // Requires exactly 1 measurement. Simply returns π * diameter.
     private func computeCircumferenceCircular() -> Double {
         let ms = arModel.measurements
         if ms.count != 1 { return 0 }
-        return .pi * ms[0].realWidth
+        return .pi * (ms[0].realWidth ?? 0)
     }
     
-    // MARK: - Helper: Integrated Circumference
-    // Given arrays of widths (in meters) and corresponding angles (in degrees),
-    // compute the integral using Simpson’s rule over the integrand: width + d²(width)/dθ².
+    // Integrated circumference via Simpson’s rule.
     private func integratedCircumference(widths: [Double], anglesDegrees: [Double]) -> Double {
-        // Sort the pairs by angle.
         let combined = zip(anglesDegrees, widths).sorted { $0.0 < $1.0 }
-        let sortedAngles = combined.map { $0.0 }
-        let sortedWidths = combined.map { $0.1 }
-        // Convert angles from degrees to radians.
+        var sortedAngles = combined.map { $0.0 }
+        var sortedWidths = combined.map { $0.1 }
+        
+        // Reorder so that the largest width is first, and ensure cyclic continuity.
+        if let maxVal = sortedWidths.max(),
+           let idx = sortedWidths.firstIndex(of: maxVal),
+           sortedWidths.count > 1 {
+            if idx != 0 {
+                let head = Array(sortedWidths[idx...])
+                let tail = Array(sortedWidths[..<idx])
+                sortedWidths = head + tail
+            }
+            if sortedWidths.last != sortedWidths.first {
+                sortedWidths.append(sortedWidths.first!)
+            }
+        }
+        
         let thetaRads = sortedAngles.map { $0 * .pi / 180.0 }
         guard thetaRads.count >= 3 else { return 0 }
+        
         let deltaTheta = thetaRads[1] - thetaRads[0]
         if deltaTheta <= 0 { return 0 }
         
-        let dw_dtheta = gradient(sortedWidths, dx: deltaTheta)
-        let d2w_dtheta2 = gradient(dw_dtheta, dx: deltaTheta)
+        let uniqueWidths = Array(sortedWidths.dropLast())
+        let dw = cyclicGradient(uniqueWidths, dx: deltaTheta)
+        let d2w = cyclicSecondDerivative(uniqueWidths, dx: deltaTheta)
+        
+        // Build the integrand: width + second derivative.
         var integrand: [Double] = []
-        for i in 0..<sortedWidths.count {
-            integrand.append(sortedWidths[i] + d2w_dtheta2[i])
+        for i in 0..<uniqueWidths.count {
+            integrand.append(uniqueWidths[i] + d2w[i])
         }
+        
         return simpson(integrand, dx: deltaTheta)
     }
     
-    // MARK: - Numerical Gradient
-    private func gradient(_ y: [Double], dx: Double) -> [Double] {
+    private func cyclicGradient(_ y: [Double], dx: Double) -> [Double] {
         let n = y.count
-        guard n >= 2, dx > 0 else { return Array(repeating: 0, count: n) }
-        
         var g = [Double](repeating: 0, count: n)
-        
-        // Forward difference for the first point.
-        g[0] = (y[1] - y[0]) / dx
-        
-        // Central difference for interior points.
-        for i in 1..<(n - 1) {
-            g[i] = (y[i + 1] - y[i - 1]) / (2 * dx)
+        for i in 0..<n {
+            let next = (i + 1) % n
+            let prev = (i - 1 + n) % n
+            g[i] = (y[next] - y[prev]) / (2 * dx)
         }
-        
-        // Backward difference for the last point.
-        g[n - 1] = (y[n - 1] - y[n - 2]) / dx
-        
         return g
     }
     
-    // MARK: - Simpson's Rule Integration
+    private func cyclicSecondDerivative(_ y: [Double], dx: Double) -> [Double] {
+        let n = y.count
+        var d2 = [Double](repeating: 0, count: n)
+        for i in 0..<n {
+            let next = (i + 1) % n
+            let prev = (i - 1 + n) % n
+            d2[i] = (y[next] - 2 * y[i] + y[prev]) / (dx * dx)
+        }
+        return d2
+    }
+    
     private func simpson(_ y: [Double], dx: Double) -> Double {
         let n = y.count
         if n < 2 { return 0 }
         
         let intervals = n - 1
         var sum = 0.0
+        
         if intervals % 2 == 0 {
-            // Even number of intervals.
             var i = 0
             while i < intervals {
                 let y0 = y[i]
@@ -139,7 +238,6 @@ struct CalculationView: View {
                 i += 2
             }
         } else {
-            // Odd number of intervals: Simpson for most, then trapezoidal rule for the last interval.
             var i = 0
             while i < (intervals - 1) {
                 let y0 = y[i]
@@ -152,6 +250,105 @@ struct CalculationView: View {
             let yB = y[n - 1]
             sum += 0.5 * dx * (yA + yB)
         }
+        
         return sum
+    }
+    
+    // MARK: - Plot Data for Chart
+    
+    private var plotData: [(angle: Double, width: Double)] {
+        let sorted = arModel.measurements.sorted { $0.rotationAngle < $1.rotationAngle }
+        var data: [(Double, Double)] = []
+        for (i, m) in sorted.enumerated() {
+            let angleRad = Double(m.rotationAngle) * .pi / 180.0
+            if let w = m.realWidth, !m.isPlaceholder {
+                data.append((angleRad, w))
+            } else if m.isPlaceholder, let interp = interpolatedWidth(for: i, in: sorted) {
+                data.append((angleRad, interp))
+            }
+        }
+        return data
+    }
+    
+    private func interpolatedWidth(for index: Int, in measurements: [ARModel.Measurement]) -> Double? {
+        guard measurements[index].isPlaceholder == true else {
+            return measurements[index].realWidth
+        }
+        var prevIndex: Int? = nil
+        for i in stride(from: index - 1, through: 0, by: -1) {
+            if !measurements[i].isPlaceholder, let _ = measurements[i].realWidth {
+                prevIndex = i
+                break
+            }
+        }
+        var nextIndex: Int? = nil
+        for i in (index + 1)..<measurements.count {
+            if !measurements[i].isPlaceholder, let _ = measurements[i].realWidth {
+                nextIndex = i
+                break
+            }
+        }
+        if let prev = prevIndex, let next = nextIndex,
+           let prevWidth = measurements[prev].realWidth,
+           let nextWidth = measurements[next].realWidth {
+            let factor = Double(index - prev) / Double(next - prev)
+            return prevWidth + factor * (nextWidth - prevWidth)
+        }
+        return nil
+    }
+    
+    // MARK: - Body
+    
+    var body: some View {
+        // Compute circumference and its error.
+        let circumference = computeCircumference()
+        let error = computeCircumferenceError(circumference: circumference)
+        
+        VStack(spacing: 16) {
+            Spacer()
+            
+            Text("Approx. Result:")
+                .font(.headline)
+            
+            // Display circumference and error in centimeters (multiply by 100).
+            Text(String(format: "%.2f cm ± %.2f cm", circumference * 100, error * 100))
+                .font(.largeTitle)
+                .bold()
+                .padding(.horizontal)
+            
+            // (Optional) Your Chart view and additional UI...
+            Chart {
+                ForEach(plotData, id: \.angle) { point in
+                    LineMark(
+                        x: .value("Angle (rad)", point.angle),
+                        y: .value("Width (m)", point.width)
+                    )
+                    PointMark(
+                        x: .value("Angle (rad)", point.angle),
+                        y: .value("Width (m)", point.width)
+                    )
+                }
+            }
+            .frame(height: 250)
+            .padding()
+            .chartXAxis {
+                AxisMarks(values: .stride(by: Double.pi/2)) { value in
+                    AxisGridLine()
+                    AxisTick()
+                    if let doubleValue = value.as(Double.self) {
+                        AxisValueLabel(String(format: "%.2f", doubleValue))
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .navigationTitle("Circumference Calc")
+        // Update simpsonMaxDeriv asynchronously when measurements change.
+        .onReceive(arModel.$measurements) { _ in
+            DispatchQueue.main.async {
+                arModel.updateSimpsonMaxDeriv()
+            }
+        }
     }
 }

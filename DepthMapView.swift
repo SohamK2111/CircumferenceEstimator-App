@@ -7,6 +7,9 @@ struct DepthMapView: View {
     
     /// Indices where gradient > threshold
     var depthEdges: [Int]
+    
+    /// Subset of `depthEdges` we want to highlight
+    var usedDepthEdges: [Int]
 
     var body: some View {
         GeometryReader { geometry in
@@ -16,9 +19,9 @@ struct DepthMapView: View {
             if depthData.isEmpty {
                 Color.clear
             } else {
-                // Hard-coded chart range from 0..1.5 meters; tweak as needed
+                // Hard-coded chart range from 0..1.5 meters; tweak as needed.
                 let minDepth: Float = 0.0
-                let maxDepth: Float = 1.5
+                let maxDepth: Float = 2
                 let range = maxDepth - minDepth
                 
                 let axisWidth: CGFloat = 50
@@ -32,9 +35,8 @@ struct DepthMapView: View {
                 let scaleY = (range > 0) ? (plotHeight / CGFloat(range)) : 1.0
                 
                 HStack(spacing: spacing) {
-                    // Y-axis
+                    // Y-axis labels
                     VStack {
-                        // For example, 6 ticks (0..1.5)
                         ForEach((0...5).reversed(), id: \.self) { i in
                             let fraction = CGFloat(i) / 5.0
                             let labelDepth = minDepth + Float(fraction) * range
@@ -47,11 +49,12 @@ struct DepthMapView: View {
                     .frame(width: axisWidth)
                     
                     ZStack(alignment: .topLeading) {
-                        // 1) Plot the LiDAR slice as a "blue line"
+                        // Plot the LiDAR slice as a blue line.
                         Path { path in
                             for (i, val) in depthData.enumerated() {
                                 let clamped = max(minDepth, min(val, maxDepth))
-                                let x = CGFloat(i) * scaleX
+                                // Flip X direction:
+                                let x = plotWidth - CGFloat(i) * scaleX
                                 let y = plotHeight - (CGFloat(clamped - minDepth) * scaleY)
                                 
                                 if i == 0 {
@@ -63,16 +66,18 @@ struct DepthMapView: View {
                         }
                         .stroke(Color.blue, lineWidth: 2)
                         
-                        // 2) Red vertical lines for edges
-                        Path { edgePath in
-                            for edgeIndex in depthEdges {
-                                guard edgeIndex >= 0, edgeIndex < depthData.count else { continue }
-                                let x = CGFloat(edgeIndex) * scaleX
-                                edgePath.move(to: CGPoint(x: x, y: 0))
-                                edgePath.addLine(to: CGPoint(x: x, y: plotHeight))
+                        // Draw red vertical lines for detected edges.
+                        if !depthEdges.isEmpty {
+                            Path { edgePath in
+                                for edgeIndex in depthEdges {
+                                    guard edgeIndex >= 0, edgeIndex < depthData.count else { continue }
+                                    let x = plotWidth - CGFloat(edgeIndex) * scaleX
+                                    edgePath.move(to: CGPoint(x: x, y: 0))
+                                    edgePath.addLine(to: CGPoint(x: x, y: plotHeight))
+                                }
                             }
+                            .stroke(Color.red, lineWidth: 1.5)
                         }
-                        .stroke(Color.red, lineWidth: 1.5)
                     }
                     .frame(width: plotWidth, height: plotHeight)
                 }
@@ -81,4 +86,3 @@ struct DepthMapView: View {
         .padding()
     }
 }
-
