@@ -5,8 +5,14 @@ import CoreMotion
 import Combine
 import SceneKit
 
+enum SensorType {
+    case lidar
+    case trueDepth
+}
+
 // MARK: - ARModel
 class ARModel: NSObject, ObservableObject, ARSessionDelegate {
+    
     // MARK: LiDAR / Depth Data
     @Published var fullLiDARFloats: [Float] = []
     @Published var lidarWidth: Int = 0
@@ -18,9 +24,10 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     @Published var colorWidth: Int = 0
     @Published var colorHeight: Int = 0
     @Published var simpsonMaxDeriv: Double = 120
-    
-    @Published var isTestMode: Bool = false
-    
+    @Published var variance: Double = 0
+
+    @Published var isTestMode: Bool = true
+
     private var realWidthBuffer: [Double] = []
 
     // MARK: CoreMotion Yaw Tracking
@@ -39,7 +46,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     @Published var arSession: ARSession?
 
     // NEW: Display options for UI
-    @Published var showDepthMapView: Bool = true
+    @Published var showDepthMapView: Bool = false
     @Published var showEdgeOverlay: Bool = true
 
     override init() {
@@ -243,7 +250,13 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
                 } else {
                     self.screenPixelSpanFromEdges = nil
                 }
+                // New logic: update centralDepth to be the depth at the midpoint between detected edges.
+                let midIndex = (first + last) / 2
+                let newCenterDepth = Double(slice[midIndex])
+                self.centralDepth = newCenterDepth
+                print("Central depth updated from edge midpoint: \(newCenterDepth)")
             } else {
+                // If no valid edge pair is detected, centralDepth remains set by CameraView.
                 self.edgeDistance = nil
                 self.screenPixelSpanFromEdges = nil
             }
@@ -376,7 +389,7 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
     // MARK: Continuous Save Interval
     @Published var saveInterval: Double = 1.0
     @Published var widthsAreCorrected: Bool = false
-    @Published var divider: Double = 2.15
+    @Published var divider: Double = 2.50
 
     func applyWidthCorrection() {
         print("Width correction applied!")
@@ -424,10 +437,9 @@ class ARModel: NSObject, ObservableObject, ARSessionDelegate {
         print("Applied width correction to measurements.")
     }
     
-    // Add a published property for the clothing width constant (in centimeters, for example)
+    // Clothing correction property and function.
     @Published var clothingWidth: Double = 1.0
 
-    // New function to subtract the clothing width from all measurements
     func applyClothingCorrection() {
         for i in measurements.indices {
             if let currentWidth = measurements[i].realWidth {
@@ -488,7 +500,6 @@ extension ARModel {
     /// Assumes a sinusoidal behavior: f(θ) ≈ offset + A*cos(2θ),
     /// so that simpsonMaxDeriv = max|f⁽⁴⁾(θ)+f⁽⁶⁾(θ)| = 48 * A.
     func updateSimpsonMaxDeriv() {
-        // Extract real width values from measurements.
         let widths = measurements.compactMap { $0.realWidth }
         guard let minW = widths.min(), let maxW = widths.max() else {
             simpsonMaxDeriv = 0

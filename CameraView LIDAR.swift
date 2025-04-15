@@ -6,53 +6,52 @@ import SceneKit
 struct CameraView: UIViewRepresentable {
     @ObservedObject var arModel: ARModel
         
-        func makeCoordinator() -> Coordinator {
-            Coordinator(arModel: arModel)
-        }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(arModel: arModel)
+    }
         
-        func makeUIView(context: Context) -> ARSCNView {
-            let sceneView = ARSCNView()
-            sceneView.session.delegate = context.coordinator
-            sceneView.delegate = context.coordinator
+    func makeUIView(context: Context) -> ARSCNView {
+        let sceneView = ARSCNView()
+        sceneView.session.delegate = context.coordinator
+        sceneView.delegate = context.coordinator
             
-            // Set the ARModel's session to the one from ARSCNView.
-            arModel.setSession(sceneView.session)
+        // Set the ARModel's session to the one from ARSCNView.
+        arModel.setSession(sceneView.session)
             
+        let config = ARWorldTrackingConfiguration()
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+            config.frameSemantics.insert(.sceneDepth)
+            config.planeDetection = []
+            sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
+            print("LiDAR is available and session started.")
+        } else {
+            print("LiDAR is NOT available on this device.")
+        }
+            
+        return sceneView
+    }
+        
+    func updateUIView(_ uiView: ARSCNView, context: Context) {
+        // Restart the session if needed.
+        if uiView.session.configuration == nil {
             let config = ARWorldTrackingConfiguration()
             if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
                 config.frameSemantics.insert(.sceneDepth)
-                config.planeDetection = []
-                sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
-                print("LiDAR is available and session started.")
-            } else {
-                print("LiDAR is NOT available on this device.")
+                config.planeDetection = [.horizontal, .vertical]
             }
-            
-            return sceneView
+            uiView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
         }
+    }
         
-        func updateUIView(_ uiView: ARSCNView, context: Context) {
-            // You can restart the session if needed when the view appears.
-            // For example, if the session was paused, you might want to run it again:
-            if uiView.session.configuration == nil {
-                let config = ARWorldTrackingConfiguration()
-                if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
-                    config.frameSemantics.insert(.sceneDepth)
-                    config.planeDetection = [.horizontal, .vertical]
-                }
-                uiView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
-            }
-        }
-        
-        // Called when the view is removed from the hierarchy.
-        static func dismantleUIView(_ uiView: ARSCNView, coordinator: Coordinator) {
-            uiView.session.pause()
-            print("ARSession paused as CameraView is dismantled.")
-        }
+    // Called when the view is removed from the hierarchy.
+    static func dismantleUIView(_ uiView: ARSCNView, coordinator: Coordinator) {
+        uiView.session.pause()
+        print("ARSession paused as CameraView is dismantled.")
+    }
 
     // MARK: - Coordinator
     class Coordinator: NSObject, ARSessionDelegate, ARSCNViewDelegate {
-        // Timestamp to throttle processing.
+        // Timestamp for throttling.
         private var lastSampleTime = Date()
         // Flag to prevent overlapping frame processing.
         private var isProcessingFrame = false
@@ -74,7 +73,7 @@ struct CameraView: UIViewRepresentable {
 
         // MARK: - ARSessionDelegate
         func session(_ session: ARSession, didUpdate frame: ARFrame) {
-            // Throttle to ~10Hz and ensure only one frame is processed at a time.
+            // Throttle to about 10Hz; process one frame at a time.
             guard Date().timeIntervalSince(lastSampleTime) >= 0.1, !isProcessingFrame else {
                 return
             }
@@ -131,6 +130,7 @@ struct CameraView: UIViewRepresentable {
                             self.arModel.fullLiDARFloats = floatArray
                             self.arModel.lidarWidth = depthWidth
                             self.arModel.lidarHeight = depthHeight
+                            // Fallback: use central pixel depth if no edges are later detected.
                             self.arModel.centralDepth = Double(centerDepthMeters)
                             
                             // Optionally update min/max depth values.
@@ -141,10 +141,11 @@ struct CameraView: UIViewRepresentable {
                                 self.arModel.depthMaxValue = maxVal
                             }
                             
+                            // Compute depth edges, which may update centralDepth.
                             self.arModel.computeDepthEdges()
                         }
                     } else {
-                        // If there's no depth data, update only the color camera properties.
+                        // If no depth data is available, just update the color camera parameters.
                         DispatchQueue.main.async {
                             self.arModel.colorWidth  = width
                             self.arModel.colorHeight = height

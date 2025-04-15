@@ -29,10 +29,12 @@ struct MeasurementRowView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .focused($isWidthFieldFocused)
+                    //.onSubmit { commitWidthChange() }  // Removed to avoid premature auto-formatting.
                     .toolbar {
                         ToolbarItemGroup(placement: .keyboard) {
                             Spacer()
                             Button("Done") {
+                                // When Done is tapped, resign focus – this will trigger our onChange.
                                 isWidthFieldFocused = false
                             }
                         }
@@ -49,7 +51,7 @@ struct MeasurementRowView: View {
                     commitWidthChange()
                 }
             }
-            // If the measurement changes externally (like via correction) and we're not editing, update the text field.
+            // If the measurement changes externally (e.g. via correction) and we're not editing, update the text field.
             .onChange(of: measurement.realWidth) { newValue in
                 if !isWidthFieldFocused {
                     updateWidthText()
@@ -89,10 +91,11 @@ struct MeasurementRowView: View {
     
     // Commit the text field change to the measurement.
     private func commitWidthChange() {
-        if let newValue = Double(widthText) {
+        // Only update if the text is non-empty.
+        if let newValue = Double(widthText), !widthText.isEmpty {
             // Convert from centimeters to meters.
             measurement.realWidth = newValue / 100.0
-            // Reformat the text field content.
+            // Once editing is done, update the text to a formatted value.
             widthText = String(format: "%.2f", newValue)
         } else {
             measurement.realWidth = nil
@@ -100,7 +103,6 @@ struct MeasurementRowView: View {
         }
     }
 }
-import SwiftUI
 
 // MARK: - MeasurementsView
 struct MeasurementsView: View {
@@ -108,6 +110,8 @@ struct MeasurementsView: View {
     @State private var interpolateMeasurements: Bool = false
     // For programmatic navigation when in test mode.
     @State private var isCalculateActive: Bool = false
+    @State private var isTwoPointActive: Bool = false
+    @State private var isCircularActive: Bool = false
 
     var body: some View {
         List {
@@ -130,8 +134,13 @@ struct MeasurementsView: View {
                 if !arModel.isTestMode {
                     Section {
                         Button(action: {
-                            arModel.applyWidthCorrection()
-                            arModel.measurements = arModel.measurements
+                            // Force text fields to resign first responder so pending edits are committed.
+                            saveAllMeasurements()
+                            // Adding a slight delay allows the commit to occur.
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                arModel.applyWidthCorrection()
+                                arModel.measurements = arModel.measurements
+                            }
                         }) {
                             Text("Apply Correction")
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -178,10 +187,11 @@ struct MeasurementsView: View {
             }
             
             ToolbarItemGroup(placement: .navigationBarTrailing) {
+                // Full Calculation Button
                 Button("Calculate") {
                     autoAssignAngles()
                     
-                    // Apply correction only if test mode is enabled
+                    // Apply corrections only if test mode is enabled.
                     if arModel.isTestMode {
                         arModel.applyWidthCorrection()
                         arModel.useSymmetry()
@@ -197,26 +207,41 @@ struct MeasurementsView: View {
                     }
                     .hidden()
                 )
-
-                NavigationLink(destination: CalculationView(arModel: arModel, mode: .twoPoint)) {
-                    Button(action: {
+                
+                // 2‑Point Button
+                Button("2‑Point") {
+                    saveAllMeasurements() // Force text fields to resign first responder.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         autoAssignAngles()
-                        arModel.applyWidthCorrection()
+                        if arModel.isTestMode {
+                            arModel.applyWidthCorrection()
+                        }
                         arModel.measurements = arModel.measurements
-                    }) {
-                        Text("2‑Point")
+                        isTwoPointActive = true
                     }
                 }
-
-                NavigationLink(destination: CalculationView(arModel: arModel, mode: .circular)) {
-                    Button(action: {
-                        autoAssignAngles()
-                        arModel.applyWidthCorrection()
-                        arModel.measurements = arModel.measurements
-                    }) {
-                        Text("Circle")
+                .background(
+                    NavigationLink(destination: CalculationView(arModel: arModel, mode: .twoPoint),
+                                   isActive: $isTwoPointActive) {
+                        EmptyView()
                     }
+                    .hidden()
+                )
+                
+                // Circle Button
+                Button("Circle") {
+                    autoAssignAngles()
+                    arModel.applyWidthCorrection()
+                    arModel.measurements = arModel.measurements
+                    isCircularActive = true
                 }
+                .background(
+                    NavigationLink(destination: CalculationView(arModel: arModel, mode: .circular),
+                                   isActive: $isCircularActive) {
+                        EmptyView()
+                    }
+                    .hidden()
+                )
             }
             
             // Only show the Auto Angles button when Test Mode is off.
@@ -275,10 +300,12 @@ struct MeasurementsView: View {
         return nil
     }
     
-    // Instead of forcing first responder resignation globally,
-    // you can rely on the FocusState in each row (or call this if needed).
+    /// Force all fields to resign first responder.
     private func saveAllMeasurements() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil, from: nil, for: nil
+        )
     }
 }
 
